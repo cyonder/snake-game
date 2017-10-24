@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="content-type">
+    <meta content="utf-8" http-equiv="encoding">
+  </head>
+  <body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script type="text/javascript">
+      var canvas, ctx;
+      var snakeXSpeed = 1, snakeYSpeed = 0;
+      var snakeXPosition = 10, snakeYPosition = 10;
+      var foodX = 15, foodY = 15;
+      var gridSize = 20, tileCount = 20;
+      var trail = new Array();
+      var tail = 5;
+
+      window.onload=function(){
+        canvas = document.getElementById("gameCanvas");
+        ctx = canvas.getContext("2d");
+
+        var framesPerSecond = 15;
+        setInterval(updateAll, 1000/framesPerSecond);
+
+        document.addEventListener("keydown", keyPush);
+      }
+
+      // If statements in cases prevents snake moving the oposite side of moving direction.
+      function keyPush(e){
+        switch(e.keyCode){
+          case 37: // Left Arrow
+            if(snakeXSpeed != 1){
+              snakeXSpeed = -1;
+              snakeYSpeed = 0;
+            }
+            break;
+          case 38: // Up Arrow
+            if(snakeYSpeed != 1){
+              snakeXSpeed = 0;
+              snakeYSpeed = -1;
+            }
+            break;
+          case 39: // Right Arrow
+            if(snakeXSpeed != -1){
+              snakeXSpeed = 1;
+              snakeYSpeed = 0
+            }
+            break;
+          case 40: // Down Arrow
+            if(snakeYSpeed != -1){
+              snakeXSpeed = 0;
+              snakeYSpeed = 1;
+            }
+            break;
+        }
+      }
+
+      function updateAll(){
+        // Change the snake's direction
+        snakeXPosition += snakeXSpeed;
+        snakeYPosition += snakeYSpeed;
+
+        // Make the snake pass through the sides
+        if(snakeXPosition < 0){
+          snakeXPosition = tileCount - 1;
+        }
+        if(snakeXPosition > tileCount - 1){
+          snakeXPosition = 0;
+        }
+        if(snakeYPosition < 0){
+          snakeYPosition = tileCount - 1;
+        }
+        if(snakeYPosition > tileCount - 1){
+          snakeYPosition = 0;
+        }
+
+        // Canvas
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Snake
+        ctx.fillStyle = "lime";
+        for(var i = 0; i < trail.length; i++){
+          ctx.fillRect(trail[i].x * gridSize, trail[i].y * gridSize, gridSize - 2 , gridSize - 2);
+
+          // If the snake touches its tail, reset it back to 5
+          if(trail[i].x == snakeXPosition && trail[i].y == snakeYPosition){
+            tail = 5;
+          }
+        }
+
+        // Food
+        ctx.fillStyle = "red";
+        ctx.fillRect(foodX * gridSize, foodY * gridSize, gridSize - 2, gridSize - 2);
+
+        // Move the snake forward
+        trail.push({x: snakeXPosition, y: snakeYPosition});
+        while(trail.length > tail){
+          trail.shift();
+        }
+
+        /*
+          If the food had eaten, increment the tail by 1 and generate 2 random
+          numbers in the range of 0 - 19.
+        */
+        if(foodX == snakeXPosition && foodY == snakeYPosition){ // If food had eaten
+          tail++;
+          foodX = Math.floor(Math.random() * tileCount);
+          foodY = Math.floor(Math.random() * tileCount);
+        }
+      }
+    </script>
+  </body>
+</html>
